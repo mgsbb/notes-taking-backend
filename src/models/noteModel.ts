@@ -6,8 +6,15 @@ const noteSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		body: {
+		content: {
 			type: String,
+		},
+		tags: {
+			type: String,
+		},
+		userId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
 		},
 	},
 	{ timestamps: true }

@@ -52,10 +52,12 @@ export const register = async (req: Request, res: Response) => {
 		newUser.auth.sessionToken = token;
 		await newUser.save();
 
-		res.cookie('token', newUser.auth.sessionToken, {
-			domain: 'localhost',
-			path: '/',
-		});
+		// res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+		// res.setHeader('Access-Control-Allow-Credentials', true);
+		// res.cookie('token', newUser.auth.sessionToken, {
+		// 	domain: 'localhost',
+		// 	path: '/',
+		// });
 
 		res.status(201).json({ token, message: 'User created successfully' });
 	} catch (error) {
@@ -101,12 +103,14 @@ export const login = async (req: Request, res: Response) => {
 		user.auth.sessionToken = token;
 		await user.save();
 
-		res.cookie('token', user.auth.sessionToken, {
-			domain: 'localhost',
-			path: '/',
-		});
+		// res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+		// res.setHeader('Access-Control-Allow-Credentials', true);
+		// res.cookie('token', user.auth.sessionToken, {
+		// 	sameSite: true,
+		// 	secure: true,
+		// });
 
-		res.status(200).json({ message: 'User logged in successfully' });
+		res.status(200).json({ token, message: 'User logged in successfully' });
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ message: 'Server error' });
