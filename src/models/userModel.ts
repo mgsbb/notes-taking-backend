@@ -15,14 +15,14 @@ const userSchema = new mongoose.Schema(
 			required: true,
 			unique: true,
 		},
-		password: {
-			type: String,
-			required: true,
+		auth: {
+			password: { type: String, required: true, select: false },
+			sessionToken: { type: String, select: false },
 		},
 	},
 	{ timestamps: true }
 );
 
-const userModel = mongoose.model('User', userSchema);
+const UserModel = mongoose.model('User', userSchema);
 
-export default userModel;
+export default UserModel;
