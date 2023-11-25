@@ -10,10 +10,39 @@ import type { TDecodedData } from '../types';
 export const getNotes = async (req: Request, res: Response) => {
 	try {
 		const decodedData: TDecodedData = decodeToken(req);
+		const { page, search, sort } = req.query;
 
-		const notes = await NoteModel.find({
+		const regExp = new RegExp(search as string, 'i');
+
+		const queryObject: any = {
 			userId: decodedData.userId,
-		});
+		};
+
+		if (search !== '') {
+			queryObject.$or = [
+				{ title: regExp },
+				{ content: regExp },
+				{ tags: regExp },
+			];
+		}
+
+		let result = NoteModel.find(queryObject);
+
+		// sort
+		if (sort === 'az') {
+			result.sort('title');
+		}
+		if (sort === 'za') {
+			result.sort('-title');
+		}
+		if (sort === 'latest') {
+			result.sort('-createdAt');
+		}
+		if (sort === 'oldest') {
+			result.sort('createdAt');
+		}
+
+		const notes = await result;
 
 		return res.status(200).json({ notes });
 	} catch (error) {
@@ -36,7 +65,7 @@ export const getNote = async (req: Request, res: Response) => {
 			return res.status(404).json({ message: 'Note not found' });
 		}
 
-		if (note.userId.toString() !== decodedData.userId) {
+		if (note?.userId?.toString() !== decodedData.userId) {
 			return res.status(401).json({ message: 'Unauthorized' });
 		}
 
@@ -81,7 +110,7 @@ export const updateNote = async (req: Request, res: Response) => {
 			return res.status(404).json({ message: 'Note not found' });
 		}
 
-		if (note.userId.toString() !== decodedData.userId) {
+		if (note?.userId?.toString() !== decodedData.userId) {
 			return res.status(401).json({ message: 'Unauthorized' });
 		}
 
@@ -110,7 +139,7 @@ export const deleteNote = async (req: Request, res: Response) => {
 			return res.status(404).json({ message: 'Note not found' });
 		}
 
-		if (note.userId.toString() !== decodedData.userId) {
+		if (note?.userId?.toString() !== decodedData.userId) {
 			return res.status(401).json({ message: 'Unauthorized' });
 		}
 
