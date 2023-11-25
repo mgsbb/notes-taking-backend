@@ -9,6 +9,13 @@ import type { TDecodedData } from '../types';
 // get all notes
 export const getNotes = async (req: Request, res: Response) => {
 	try {
+		const decodedData: TDecodedData = decodeToken(req);
+
+		const notes = await NoteModel.find({
+			userId: decodedData.userId,
+		});
+
+		return res.status(200).json({ notes });
 	} catch (error) {
 		console.log(error);
 	}
@@ -18,6 +25,22 @@ export const getNotes = async (req: Request, res: Response) => {
 // get single note
 export const getNote = async (req: Request, res: Response) => {
 	try {
+		const { noteId } = req.params;
+		const decodedData: TDecodedData = decodeToken(req);
+
+		const note = await NoteModel.findOne({
+			_id: noteId,
+		});
+
+		if (!note) {
+			return res.status(404).json({ message: 'Note not found' });
+		}
+
+		if (note.userId.toString() !== decodedData.userId) {
+			return res.status(401).json({ message: 'Unauthorized' });
+		}
+
+		return res.status(200).json({ note });
 	} catch (error) {
 		console.log(error);
 	}
@@ -44,16 +67,58 @@ export const createNote = async (req: Request, res: Response) => {
 };
 
 // ==========================================================================================================
+
 export const updateNote = async (req: Request, res: Response) => {
 	try {
+		const { noteId } = req.params;
+		const decodedData: TDecodedData = decodeToken(req);
+
+		const { title, content, tags } = req.body.formData;
+
+		const note = await NoteModel.findOne({ _id: noteId });
+
+		if (!note) {
+			return res.status(404).json({ message: 'Note not found' });
+		}
+
+		if (note.userId.toString() !== decodedData.userId) {
+			return res.status(401).json({ message: 'Unauthorized' });
+		}
+
+		const updatedNote = await NoteModel.findOneAndUpdate(
+			{ _id: noteId },
+			{ title, content, tags },
+			{ new: true }
+		);
+
+		return res.status(200).json({ message: 'Note updated successfully' });
 	} catch (error) {
 		console.log(error);
 	}
 };
 
 // ==========================================================================================================
+
 export const deleteNote = async (req: Request, res: Response) => {
 	try {
+		const { noteId } = req.params;
+		const decodedData: TDecodedData = decodeToken(req);
+
+		const note = await NoteModel.findOne({ _id: noteId });
+
+		if (!note) {
+			return res.status(404).json({ message: 'Note not found' });
+		}
+
+		if (note.userId.toString() !== decodedData.userId) {
+			return res.status(401).json({ message: 'Unauthorized' });
+		}
+
+		const deletedNote = await NoteModel.findOneAndDelete({
+			_id: noteId,
+		});
+
+		return res.status(200).json({ message: 'Note deleted successfully' });
 	} catch (error) {
 		console.log(error);
 	}
